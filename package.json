@@ -1,5 +1,4 @@
 {
-  "private": true,
   "displayName": "Homebridge SHARP Cocoro",
   "name": "homebridge-sharp-cocoro",
   "version": "1.0.0",
