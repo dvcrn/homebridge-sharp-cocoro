@@ -1,4 +1,4 @@
-# homebridge-shar-cocoro
+# homebridge-sharp-cocoro
 
 *work in progress* plugin to add HomeKit support to the SHARP Cocoro API that is being used by their series of smart home appliances
 
