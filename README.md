@@ -10,9 +10,33 @@ Powered by my [cocoro-sdk](https://github.com/dvcrn/cocoro-sdk)
 - Control aircon windspeed
 - Control aircon heating/cooling mode
 
+## Install 
+
+```
+yarn add homebridge-sharp-cocoro
+```
+
+or 
+
+
+```
+npm install homebridge-sharp-cocoro
+```
+
+Then add the SharpCocoroPlatform
+
+```
+    {
+      "name": "SharpCocoroPlatform",
+      "platform": "SharpCocoroPlatform",
+      "appSecret": "xxxx",
+      "appKey": "yyyy"
+    }
+```
+
 ## Caveats
 
-Currently to authenticate, you need to use something like mitmproxy, charles or proxyman to extract the API token that your app is using.
+Currently to authenticate, you need to use something like mitmproxy, charles or proxyman to extract the API token that your app is using. You can do this by adding the proxy and simply opening the app. 
 
 Hopefully we can eventually make that easier, but currently there is no way around it.
 
