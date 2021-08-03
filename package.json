@@ -21,13 +21,16 @@
     "lint": "eslint src/**.ts --max-warnings=0",
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
-    "prepublishOnly": "npm run lint && npm run build"
+    "prepublishOnly": "npm run lint && npm run build",
+    "format": "find src/ -iname '*.ts' | xargs organize-imports-cli && prettier src/ --write"
   },
   "keywords": [
     "homebridge-plugin"
   ],
   "dependencies": {
-    "cocoro-sdk": "^0.3.0"
+    "cocoro-sdk": "^0.3.1",
+    "organize-imports-cli": "^0.8.0",
+    "prettier": "^2.3.2"
   },
   "devDependencies": {
     "@types/node": "^14.14.31",

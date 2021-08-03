@@ -1,11 +1,10 @@
-import { API } from 'homebridge';
-
-import { PLATFORM_NAME } from './settings';
-import { SharpCocoroPlatform } from './platform';
+import { API } from "homebridge";
+import { SharpCocoroPlatform } from "./platform";
+import { PLATFORM_NAME } from "./settings";
 
 /**
  * This method registers the platform with Homebridge
  */
 export = (api: API) => {
-  api.registerPlatform(PLATFORM_NAME, SharpCocoroPlatform);
+	api.registerPlatform(PLATFORM_NAME, SharpCocoroPlatform);
 };

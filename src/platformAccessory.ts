@@ -1,17 +1,10 @@
 import {
 	Device,
-	SingleProperty,
 	SinglePropertyStatus,
 	StatusCode,
 	ValueSingle,
 } from "cocoro-sdk";
-import {
-	Service,
-	PlatformAccessory,
-	CharacteristicValue,
-	Characteristic,
-} from "homebridge";
-
+import { PlatformAccessory, Service } from "homebridge";
 import { SharpCocoroPlatform } from "./platform";
 
 /**
@@ -30,17 +23,19 @@ export class CocoroDevice {
 		this.device = accessory.context.device as Device;
 
 		// set accessory information
-		this.accessory
-			.getService(this.platform.Service.AccessoryInformation)!
-			.setCharacteristic(
-				this.platform.Characteristic.Manufacturer,
-				this.device.maker
-			)
-			.setCharacteristic(this.platform.Characteristic.Model, this.device.model)
-			.setCharacteristic(
-				this.platform.Characteristic.SerialNumber,
-				this.device.serialNumber || this.device.echonetNode
-			);
+		const accInfo = this.accessory.getService(this.platform.Service.AccessoryInformation)
+		if (accInfo) {
+			accInfo
+				.setCharacteristic(
+					this.platform.Characteristic.Manufacturer,
+					this.device.maker
+				)
+				.setCharacteristic(this.platform.Characteristic.Model, this.device.model)
+				.setCharacteristic(
+					this.platform.Characteristic.SerialNumber,
+					this.device.serialNumber || this.device.echonetNode
+				);
+		}
 
 		// get the LightBulb service if it exists, otherwise create a new LightBulb service
 		// you can create multiple services for each accessory
@@ -75,7 +70,6 @@ export class CocoroDevice {
 			.getCharacteristic(this.platform.Characteristic.TargetTemperature)
 			.onGet(this.handleTargetTemperatureGet.bind(this))
 			.onSet(this.handleTargetTemperatureSet.bind(this));
-
 
 		this.service
 			.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
@@ -210,7 +204,6 @@ export class CocoroDevice {
 
 		await this.platform.submitDeviceUpdates(this.device);
 	}
-
 
 	handleTargetHeatingCoolingStateGet() {
 		const currentState = this.device.getPropertyStatus(

@@ -1,17 +1,15 @@
+import { Cocoro, Device } from "cocoro-sdk";
 import {
 	API,
+	Characteristic,
 	DynamicPlatformPlugin,
 	Logger,
 	PlatformAccessory,
 	PlatformConfig,
 	Service,
-	Characteristic,
 } from "homebridge";
-
-import { PLATFORM_NAME, PLUGIN_NAME } from "./settings";
 import { CocoroDevice } from "./platformAccessory";
-
-import { Cocoro, Device, StatusCode } from "cocoro-sdk";
+import { PLATFORM_NAME, PLUGIN_NAME } from "./settings";
 
 /**
  * HomebridgePlatform
