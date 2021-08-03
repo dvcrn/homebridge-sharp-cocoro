@@ -1,0 +1,22 @@
+{
+  "pluginAlias": "SharpCocoroPlatform",
+  "pluginType": "platform",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "appSecret": {
+        "title": "App Secret",
+        "type": "string",
+        "required": true,
+        "default": ""
+      },
+      "appKey": {
+        "title": "App Key",
+        "type": "string",
+        "required": true,
+        "default": ""
+      }
+    }
+  }
+}
