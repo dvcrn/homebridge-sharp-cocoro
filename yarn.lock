@@ -483,10 +483,10 @@ clone-response@^1.0.2:
   dependencies:
     mimic-response "^1.0.0"
 
-cocoro-sdk@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/cocoro-sdk/-/cocoro-sdk-0.3.1.tgz#a99b5c1609fdcb31d2cd174719f01fce9f69987f"
-  integrity sha512-nkaapP5aR+GTkBUkEZKaHJJEuDuhATk2Lx/Ou34LoaoU5KXNjfuN8lHMPWE9eSzCk0JLd/a1a4FDBhvGw4dzdA==
+cocoro-sdk@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/cocoro-sdk/-/cocoro-sdk-0.3.3.tgz#a954db1de8fc078e7b7d19dcdfd9e9bb781b24e3"
+  integrity sha512-7MxpXu/43CJO0Bcr8HvO6svRM4Z2tlYwd8o7ngQF1FJyNByJJsPJbibWWOyc40BuvzirFAoXGUdrNNAF4shNdA==
   dependencies:
     fetch-cookie "^1.0.0"
     node-fetch "^2.6.1"
