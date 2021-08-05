@@ -16,6 +16,10 @@ export class CocoroDevice {
 	private service: Service;
 	private device: Device;
 
+	private deviceState = {
+		WindSpeed: 100,
+	};
+
 	constructor(
 		private readonly platform: SharpCocoroPlatform,
 		private readonly accessory: PlatformAccessory
@@ -23,14 +27,19 @@ export class CocoroDevice {
 		this.device = accessory.context.device as Device;
 
 		// set accessory information
-		const accInfo = this.accessory.getService(this.platform.Service.AccessoryInformation)
+		const accInfo = this.accessory.getService(
+			this.platform.Service.AccessoryInformation
+		);
 		if (accInfo) {
 			accInfo
 				.setCharacteristic(
 					this.platform.Characteristic.Manufacturer,
 					this.device.maker
 				)
-				.setCharacteristic(this.platform.Characteristic.Model, this.device.model)
+				.setCharacteristic(
+					this.platform.Characteristic.Model,
+					this.device.model
+				)
 				.setCharacteristic(
 					this.platform.Characteristic.SerialNumber,
 					this.device.serialNumber || this.device.echonetNode
@@ -55,7 +64,7 @@ export class CocoroDevice {
 			.getCharacteristic(
 				this.platform.Characteristic.CurrentHeatingCoolingState
 			)
-			.onGet(this.handleTargetHeatingCoolingStateGet.bind(this));
+			.onGet(this.handleCurrentHeatingCoolingStateGet.bind(this));
 
 		this.service.setCharacteristic(
 			this.platform.Characteristic.CurrentHeatingCoolingState,
@@ -96,6 +105,11 @@ export class CocoroDevice {
 			.onGet(this.handleFanActiveGet.bind(this))
 			.onSet(this.handleFanActiveSet.bind(this));
 
+		fanService
+			.getCharacteristic(this.platform.Characteristic.TargetFanState)
+			.onGet(this.targetFanStateGet.bind(this))
+			.onSet(this.targetFanStateSet.bind(this));
+
 		fanService.setCharacteristic(
 			this.platform.Characteristic.Name,
 			this.device.name
@@ -110,34 +124,39 @@ export class CocoroDevice {
 		this.device = d;
 	}
 
-	handleRotationSpeedGet() {
+	async targetFanStateSet(targetState) {
+		if (targetState === this.platform.Characteristic.TargetFanState.AUTO) {
+			this.device.queueWindspeedUpdate(ValueSingle.WINDSPEED_LEVEL_AUTO);
+			this.device.queueTemperatureUpdate(this.device.getTemperature());
+			await this.platform.submitDeviceUpdates(this.device);
+		} else {
+			await this.handleRotationSpeedSet(this.deviceState.WindSpeed);
+		}
+	}
+
+	targetFanStateGet() {
 		const ws = this.device.getWindspeed();
-		switch (ws) {
-			case ValueSingle.WINDSPEED_LEVEL_1:
-				return 12;
-			case ValueSingle.WINDSPEED_LEVEL_2:
-				return 25;
-			case ValueSingle.WINDSPEED_LEVEL_3:
-				return 38;
-			case ValueSingle.WINDSPEED_LEVEL_4:
-				return 50;
-			case ValueSingle.WINDSPEED_LEVEL_5:
-				return 62;
-			case ValueSingle.WINDSPEED_LEVEL_6:
-				return 75;
-			case ValueSingle.WINDSPEED_LEVEL_7:
-				return 87;
-			case ValueSingle.WINDSPEED_LEVEL_8:
-				return 100;
-			case ValueSingle.WINDSPEED_LEVEL_AUTO:
-				return 0;
+		if (ws === ValueSingle.WINDSPEED_LEVEL_AUTO) {
+			return this.platform.Characteristic.TargetFanState.AUTO;
 		}
 
-		return 0;
+		return this.platform.Characteristic.TargetFanState.MANUAL;
+	}
+
+	handleRotationSpeedGet() {
+		return this.deviceState.WindSpeed;
 	}
 
 	async handleRotationSpeedSet(speed) {
+		// Using a state variable here due to the switch between MANUAL and AUTO
+		// If user selects AUTO, we still want to display the same windspeed as always
+		this.deviceState.WindSpeed = speed;
+
 		switch (true) {
+			case speed === 0:
+				this.device.queuePowerOff();
+				break;
+
 			case speed === 100:
 				this.device.queueWindspeedUpdate(ValueSingle.WINDSPEED_LEVEL_8);
 				this.device.queueTemperatureUpdate(this.device.getTemperature());
@@ -191,7 +210,7 @@ export class CocoroDevice {
 	}
 
 	async handleTargetTemperatureSet(t) {
-		this.platform.log.debug("setting new temp", t);
+		this.platform.log.info("setting temperature: ", t);
 
 		// cocoro API requires these 3 to be batched together when changing temperature
 		this.device.queueTemperatureUpdate(t);
@@ -203,6 +222,32 @@ export class CocoroDevice {
 		}
 
 		await this.platform.submitDeviceUpdates(this.device);
+	}
+
+	handleCurrentHeatingCoolingStateGet() {
+		const targetHeatingCoolingState = this.handleCurrentTemperatureGet();
+		const roomTemp = this.device.getRoomTemperature();
+		const curTemp = this.device.getTemperature();
+
+		switch (targetHeatingCoolingState) {
+			case this.platform.Characteristic.TargetHeatingCoolingState.OFF:
+				return this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
+
+			case this.platform.Characteristic.TargetHeatingCoolingState.HEAT:
+				return this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
+
+			case this.platform.Characteristic.TargetHeatingCoolingState.COOL:
+				return this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+
+			// If in AUTO mode, determine what the AC is doing based on room temp and currently set temp
+			case this.platform.Characteristic.TargetHeatingCoolingState.AUTO:
+			default:
+				if (roomTemp >= curTemp) {
+					return this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+				}
+
+				return this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
+		}
 	}
 
 	handleTargetHeatingCoolingStateGet() {
