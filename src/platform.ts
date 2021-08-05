@@ -24,6 +24,9 @@ export class SharpCocoroPlatform implements DynamicPlatformPlugin {
 	// this is used to track restored cached accessories
 	public readonly accessories: PlatformAccessory[] = [];
 
+	// timeout for making sure we don't spam the API
+	private deviceSubmitTimeout;
+
 	private cocoro: Cocoro;
 
 	constructor(
@@ -137,10 +140,15 @@ export class SharpCocoroPlatform implements DynamicPlatformPlugin {
 	}
 
 	async submitDeviceUpdates(device: Device) {
-		this.log.debug(
-			"submitting device state update to cocoro api",
-			device.propertyUpdates
-		);
-		this.cocoro.executeQueuedUpdates(device);
+		this.deviceSubmitTimeout && clearTimeout(this.deviceSubmitTimeout);
+
+		this.deviceSubmitTimeout = setTimeout(() => {
+			this.log.debug(
+				"submitting device state update to cocoro api",
+				device.propertyUpdates
+			);
+
+			this.cocoro.executeQueuedUpdates(device);
+		}, 1000);
 	}
 }
