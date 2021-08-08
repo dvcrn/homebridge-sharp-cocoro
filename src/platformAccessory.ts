@@ -144,6 +144,28 @@ export class CocoroDevice {
 	}
 
 	handleRotationSpeedGet() {
+		const ws = this.device.getWindspeed();
+		switch (ws) {
+			case ValueSingle.WINDSPEED_LEVEL_AUTO:
+				return this.deviceState.WindSpeed;
+			case ValueSingle.WINDSPEED_LEVEL_1:
+				return 12;
+			case ValueSingle.WINDSPEED_LEVEL_2:
+				return 25;
+			case ValueSingle.WINDSPEED_LEVEL_3:
+				return 38;
+			case ValueSingle.WINDSPEED_LEVEL_4:
+				return 50;
+			case ValueSingle.WINDSPEED_LEVEL_5:
+				return 62;
+			case ValueSingle.WINDSPEED_LEVEL_6:
+				return 75;
+			case ValueSingle.WINDSPEED_LEVEL_7:
+				return 87;
+			case ValueSingle.WINDSPEED_LEVEL_8:
+				return 100;
+		}
+
 		return this.deviceState.WindSpeed;
 	}
 
@@ -151,6 +173,12 @@ export class CocoroDevice {
 		// Using a state variable here due to the switch between MANUAL and AUTO
 		// If user selects AUTO, we still want to display the same windspeed as always
 		this.deviceState.WindSpeed = speed;
+
+		// In automode, just update internal state but don't actually change the speed
+		// Speed will be automated when user switches back from auto to manual
+		if (this.device.getWindspeed() === ValueSingle.WINDSPEED_LEVEL_AUTO) {
+			return;
+		}
 
 		switch (true) {
 			case speed === 0:
@@ -264,6 +292,10 @@ export class CocoroDevice {
 		}
 
 		switch (currentState.valueSingle.code) {
+			// 'other' includes the self-cleaning mode which we can consider as off
+			case ValueSingle.OPERATION_OTHER:
+				return this.platform.Characteristic.TargetHeatingCoolingState.OFF;
+
 			case ValueSingle.OPERATION_AUTO:
 				return this.platform.Characteristic.TargetHeatingCoolingState.AUTO;
 			case ValueSingle.OPERATION_COOL:
@@ -319,11 +351,11 @@ export class CocoroDevice {
 	async handleFanActiveSet(state) {
 		if (state === this.platform.Characteristic.Active.INACTIVE) {
 			this.device.queuePowerOff();
-		} else {
-			this.device.queuePowerOn();
-			this.device.queueTemperatureUpdate(this.device.getTemperature());
+			await this.platform.submitDeviceUpdates(this.device);
+			return;
 		}
 
-		await this.platform.submitDeviceUpdates(this.device);
+		this.device.queuePowerOn();
+		await this.handleRotationSpeedSet(this.deviceState.WindSpeed);
 	}
 }
