@@ -16,6 +16,12 @@
         "type": "string",
         "required": true,
         "default": ""
+      },
+      "serviceName": {
+        "title": "Service Name",
+        "type": "string",
+        "required": false,
+        "default": "iClub"
       }
     }
   }

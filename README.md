@@ -30,7 +30,8 @@ Then add the SharpCocoroPlatform
       "name": "SharpCocoroPlatform",
       "platform": "SharpCocoroPlatform",
       "appSecret": "xxxx",
-      "appKey": "yyyy"
+      "appKey": "yyyy",
+      "serviceName": "iClub" // <- optional. leave if 'iClub'
     }
 ```
 

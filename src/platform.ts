@@ -36,8 +36,7 @@ export class SharpCocoroPlatform implements DynamicPlatformPlugin {
 	) {
 		this.log.debug("Finished initializing platform:", this.config.name);
 
-		console.log(config);
-		this.cocoro = new Cocoro(config["appSecret"], config["appKey"]);
+		this.cocoro = new Cocoro(config["appSecret"], config["appKey"], config["serviceName"] || "iClub");
 
 		// When this event is fired it means Homebridge has restored all cached accessories from disk.
 		// Dynamic Platform plugins should only register new accessories after this event was fired,
