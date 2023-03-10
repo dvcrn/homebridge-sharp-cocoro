@@ -124,8 +124,8 @@ export class CocoroDevice {
 
 	async refreshData() {
 		this.platform.log.debug(`refreshing device ${this.device.name}`);
-		const d = try {
-			await this.platform.fetchDevice(this.device);
+		try {
+			const d = await this.platform.fetchDevice(this.device);
 			this.device = d;
 		} catch (e) {
 			this.platform.log.error("failed to refresh device: ", e);
@@ -136,7 +136,7 @@ export class CocoroDevice {
 		if (targetState === this.platform.Characteristic.TargetFanState.AUTO) {
 			this.device.queueWindspeedUpdate(ValueSingle.WINDSPEED_LEVEL_AUTO);
 			this.device.queueTemperatureUpdate(this.device.getTemperature());
-			await this.platform.submitDeviceUpdates(this.device);
+			await this.platform.submitDeviceUpdates(this);
 		} else {
 			await this.handleRotationSpeedSet(this.deviceState.WindSpeed);
 		}
@@ -234,7 +234,7 @@ export class CocoroDevice {
 				break;
 		}
 
-		await this.platform.submitDeviceUpdates(this.device);
+		await this.platform.submitDeviceUpdates(this);
 	}
 
 	handleCurrentTemperatureGet() {
@@ -257,7 +257,7 @@ export class CocoroDevice {
 			this.device.queuePropertyStatusUpdate(status);
 		}
 
-		await this.platform.submitDeviceUpdates(this.device);
+		await this.platform.submitDeviceUpdates(this);
 	}
 
 	handleCurrentHeatingCoolingStateGet() {
@@ -344,7 +344,7 @@ export class CocoroDevice {
 			this.device.queueOperationModeUpdate(ValueSingle.OPERATION_AUTO);
 		}
 
-		await this.platform.submitDeviceUpdates(this.device);
+		await this.platform.submitDeviceUpdates(this);
 	}
 
 	handleFanActiveGet() {
@@ -359,7 +359,7 @@ export class CocoroDevice {
 	async handleFanActiveSet(state) {
 		if (state === this.platform.Characteristic.Active.INACTIVE) {
 			this.device.queuePowerOff();
-			await this.platform.submitDeviceUpdates(this.device);
+			await this.platform.submitDeviceUpdates(this);
 			return;
 		}
 
