@@ -20,6 +20,8 @@ export class CocoroDevice {
 		WindSpeed: 100,
 	};
 
+	private isLoading = false;
+
 	constructor(
 		private readonly platform: SharpCocoroPlatform,
 		private readonly accessory: PlatformAccessory
@@ -123,12 +125,21 @@ export class CocoroDevice {
 	}
 
 	async refreshData() {
+		if (this.isLoading) {
+			this.platform.log.debug(`device ${this.device.name} is already loading, skipping`);
+			return;
+		}
+
 		this.platform.log.debug(`refreshing device ${this.device.name}`);
+		this.isLoading = true;
+
 		try {
 			const d = await this.platform.fetchDevice(this.device);
 			this.device = d;
 		} catch (e) {
 			this.platform.log.error("failed to refresh device: ", e);
+		} finally {
+			this.isLoading = false;
 		}
 	}
 
