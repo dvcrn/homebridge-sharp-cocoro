@@ -118,10 +118,18 @@ export class CocoroDevice {
 		setInterval(this.refreshData.bind(this), 10000);
 	}
 
+	getDevice() {
+		return this.device;
+	}
+
 	async refreshData() {
 		this.platform.log.debug(`refreshing device ${this.device.name}`);
-		const d = await this.platform.fetchDevice(this.device);
-		this.device = d;
+		const d = try {
+			await this.platform.fetchDevice(this.device);
+			this.device = d;
+		} catch (e) {
+			this.platform.log.error("failed to refresh device: ", e);
+		}
 	}
 
 	async targetFanStateSet(targetState) {

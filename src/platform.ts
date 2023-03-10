@@ -138,16 +138,18 @@ export class SharpCocoroPlatform implements DynamicPlatformPlugin {
 		return this.cocoro.fetchDevice(device);
 	}
 
-	async submitDeviceUpdates(device: Device) {
+	async submitDeviceUpdates(device: CocoroDevice) {
 		this.deviceSubmitTimeout && clearTimeout(this.deviceSubmitTimeout);
 
 		this.deviceSubmitTimeout = setTimeout(() => {
 			this.log.debug(
 				"submitting device state update to cocoro api",
-				device.propertyUpdates
+				device.getDevice().propertyUpdates
 			);
 
-			this.cocoro.executeQueuedUpdates(device);
-		}, 1000);
+			this.cocoro.executeQueuedUpdates(device.getDevice()).then(() => {
+				device.refreshData();
+			});
+		}, 800);
 	}
 }
