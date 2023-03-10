@@ -272,7 +272,7 @@ export class CocoroDevice {
 	}
 
 	handleCurrentHeatingCoolingStateGet() {
-		const targetHeatingCoolingState = this.handleCurrentTemperatureGet();
+		const targetHeatingCoolingState = this.handleTargetHeatingCoolingStateGet();
 		const roomTemp = this.device.getRoomTemperature();
 		const curTemp = this.device.getTemperature();
 
@@ -288,12 +288,13 @@ export class CocoroDevice {
 
 			// If in AUTO mode, determine what the AC is doing based on room temp and currently set temp
 			case this.platform.Characteristic.TargetHeatingCoolingState.AUTO:
-			default:
 				if (roomTemp >= curTemp) {
 					return this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
 				}
-
 				return this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
+
+			default:
+				return this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
 		}
 	}
 
